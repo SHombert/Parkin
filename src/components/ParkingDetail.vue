@@ -3,7 +3,7 @@
     <div class="hero-body">
       <div class="container">
         <h2 class="subtitle">
-          Marking Details
+          Parking Details
         </h2>
       </div>
     </div>
