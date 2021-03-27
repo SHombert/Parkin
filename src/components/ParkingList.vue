@@ -1,11 +1,11 @@
 <template>
   <section class="hero">
     <div class="container">
-      <div class="columns is-multiline">
+      <div class="row">
         <ParkingCard
           v-for="parking in parkings"
           :key="parking.recordid"
-          class="column is-half-tablet is-one-third-desktop is-one-quarter-widescreen"
+          class="col"
           :parking="parking"
           @click="goToParkingDetails(parking)"
         />
