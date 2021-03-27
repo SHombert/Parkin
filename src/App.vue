@@ -7,17 +7,18 @@
     <div class="container">
       <router-view />
     </div>
+    
   </div>
+  
 </template>
 
 <script>
-import MenuView from './components/MenuView.vue'
+import MenuView from "./components/MenuView.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    MenuView
-  }
-}
+    MenuView,
+  },
+};
 </script>
-
