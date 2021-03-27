@@ -1,17 +1,14 @@
 <template>
-  <section class="hero">
-    <div class="container">
-      <div class="row">
+
+      <div class="card-columns">
         <ParkingCard
           v-for="parking in parkings"
           :key="parking.recordid"
-          class="col"
+          class="card"
           :parking="parking"
-          @click="goToParkingDetails(parking)"
         />
       </div>
-    </div>
-  </section>
+
 </template>
 
 <script>
