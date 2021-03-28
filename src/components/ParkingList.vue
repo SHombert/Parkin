@@ -32,7 +32,6 @@ export default {
       )
       .then((response) => {
         this.parkings = response.data.records;
-        console.log("Parkings : " + this.parkings);
       })
       .catch((error) => {
         console.log(error);

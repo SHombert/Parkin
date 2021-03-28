@@ -1,14 +1,6 @@
 <template>
   <div>
     <div class="card text-center">
-      <div class="card-header">
-        <a
-          :href="parking.fields.site_web"
-          target="out"
-          class="btn btn-link btn-sm"
-          >Site web</a
-        >
-      </div>
       <div class="card-body">
         <h5 class="card-title">{{ parking.fields.nom_complet }}</h5>
 
@@ -37,7 +29,7 @@
           >
         </div>
       </div>
-      <div class="card-footer">
+      <div class="card-footer font-weight-bold">
         {{ parking.fields.capacite_voiture }} places
       </div>
     </div>
