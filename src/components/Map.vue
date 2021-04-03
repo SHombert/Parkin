@@ -1,15 +1,34 @@
 <template>
   <div class="container">
-    <l-map style="height:100vh" :zoom="zoom" :center="center">
+    <l-map v-if="!isLoading" style="height:100vh" :zoom="zoom" :center="center">
       <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-      <LGeoJson :geojson="geojson"></LGeoJson>
+      <l-marker
+        v-for="marker in markers"
+        :key="marker.location"
+        :lat-lng="marker.location"
+        :options="marker.options"
+        @click="clickedMarker(marker.location)"
+      >
+        <l-popup v-if="clicked" class="text-center" autopan="false">
+          <p class="lead">{{ currentParking.fields.nom_complet }}</p>
+          <button class="btn btn-outline-info btn-sm d-flex">
+            <a
+              href="#"
+              @click="goToParkingDetails(currentParking)"
+              >Voir les détails</a
+            >
+          </button>
+        </l-popup>
+        <div v-if="!clicked"></div>
+      </l-marker>
     </l-map>
+    <p v-else>Chargement en cours...</p>
   </div>
 </template>
 
 <script>
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LGeoJson } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LMarker, LPopup } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
 
 export default {
@@ -17,10 +36,12 @@ export default {
   components: {
     LMap,
     LTileLayer,
-    LGeoJson,
+    LMarker,
+    LPopup,
   },
   data() {
     return {
+      isLoading: true,
       parkings: new Array(),
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       zoom: 13,
@@ -28,14 +49,10 @@ export default {
       bounds: null,
       attribution:
         "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
-      geojson: {
-        type: "FeatureCollection",
-        features: [
-        ],
-      },
-      geojsonOptions: {
-        // Options that don't rely on Leaflet methods.
-      },
+      markers: new Array(),
+      markerIcon: "../../public/assets/placeholder.png",
+      currentParking: {},
+      clicked: false,
     };
   },
   async beforeMount() {
@@ -53,22 +70,36 @@ export default {
       )
       .then((response) => {
         this.parkings = response.data.records;
-        for (let parkingData in this.parkings) {
-          var geojsonFeature = {
-            type: "Feature",
-            properties: {
-              name: parkingData.fields.nom_complet,
-              popupContent: parkingData.fields.presentation ,
+        this.parkings.forEach((value) => {
+          var marker = {
+            location: value.fields.location,
+            options: {
+              title: value.fields.nom_complet,
             },
-            geometry: parkingData.geometry,
           };
-          this.geojson.features.push(geojsonFeature);
-        }
-        console.log("Parkings : " + this.parkings);
+          console.log(marker);
+          this.markers.push(marker);
+        });
+        this.isLoading = false;
       })
       .catch((error) => {
         console.log(error);
       });
+  },
+  methods: {
+    clickedMarker(location) {
+      this.currentParking = this.parkings.filter(
+        (record) => record.fields.location == location
+      )[0];
+      console.log(this.currentParking.fields.nom_complet);
+      this.clicked = true;
+    },
+    goToParkingDetails(parking) {
+      this.$router.push({
+        name: "ParkingDetail",
+        params: { id: parking.recordid },
+      });
+    },
   },
 };
 </script>
