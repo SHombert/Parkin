@@ -13,7 +13,7 @@
       </button>
       <div>
         <span
-          v-if="(parking.fields.acces_PMR = 'OUI')"
+          v-if="parking.fields.acces_pmr == 'OUI'"
           class="badge badge-info m-2"
           >{{ parking.fields.capacite_pmr }}
           <img
@@ -23,7 +23,7 @@
             alt=""
         /></span>
         <span
-          v-if="(parking.fields.stationnement_velo = 'OUI')"
+          v-if="parking.fields.stationnement_velo == 'OUI'"
           class="badge badge-success"
           >Vélo : {{ parking.fields.capacite_velo }}</span
         >
@@ -66,7 +66,6 @@ export default {
     return {
       parking: {},
       isLoading: true,
-
       mapURL: String,
     };
   },

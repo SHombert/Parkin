@@ -37,13 +37,5 @@ export default {
         console.log(error);
       });
   },
-  methods: {
-    goToParkingDetails(parking) {
-      this.$router.push({
-        name: "ParkingDetail",
-        params: { id: parking.recordid },
-      });
-    },
-  },
 };
 </script>

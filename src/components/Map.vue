@@ -98,7 +98,6 @@ export default {
         if (this.geoOk) {
           this.geolocationMarker[0] = this.coordinates.coords.latitude;
           this.geolocationMarker[1] = this.coordinates.coords.longitude;
-          console.log("geo: " + this.geolocationMarker);
         }
 
         this.isLoading = false;
@@ -122,8 +121,7 @@ export default {
       });
     },
   },
-  computed:{
-    
+  computed:{  
     dynamicAnchor() {
       return [this.iconSize / 2, this.iconSize * 1.15];
     }
