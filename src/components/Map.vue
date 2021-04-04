@@ -12,14 +12,22 @@
         <l-popup v-if="clicked" class="text-center" autopan="false">
           <p class="lead">{{ currentParking.fields.nom_complet }}</p>
           <button class="btn btn-outline-info btn-sm d-flex">
-            <a
-              href="#"
-              @click="goToParkingDetails(currentParking)"
+            <a href="#" @click="goToParkingDetails(currentParking)"
               >Voir les détails</a
             >
           </button>
         </l-popup>
+        <l-icon :icon-anchor="dynamicAnchor">
+          <img src="../../public/assets/placeholder.png" width="30"
+            height="30">
+        </l-icon>
         <div v-if="!clicked"></div>
+      </l-marker>
+      <l-marker v-if="geoOk" :lat-lng="geolocationMarker">
+        <l-icon :icon-anchor="dynamicAnchor">
+          <img src="../../public/assets/pin.png" width="30"
+            height="30">
+        </l-icon>
       </l-marker>
     </l-map>
     <p v-else>Chargement en cours...</p>
@@ -28,8 +36,10 @@
 
 <script>
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LMarker, LPopup } from "@vue-leaflet/vue-leaflet";
+
+import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
+import { Geolocation } from "@capacitor/core";
 
 export default {
   name: "Map",
@@ -38,6 +48,7 @@ export default {
     LTileLayer,
     LMarker,
     LPopup,
+    LIcon,
   },
   data() {
     return {
@@ -50,9 +61,12 @@ export default {
       attribution:
         "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
       markers: new Array(),
-      markerIcon: "../../public/assets/placeholder.png",
+      geolocationMarker: new Array(),
       currentParking: {},
       clicked: false,
+      coordinates: {},
+      geoOk: false,
+      iconSize:25,
     };
   },
   async beforeMount() {
@@ -62,6 +76,8 @@ export default {
     //And now the Leaflet circleMarker function can be used by the options:
 
     this.mapIsReady = true;
+    this.coordinates = await Geolocation.getCurrentPosition();
+    this.geoOk = !(typeof this.coordinates=== "undefined");
   },
   mounted() {
     axios
@@ -77,9 +93,14 @@ export default {
               title: value.fields.nom_complet,
             },
           };
-          console.log(marker);
           this.markers.push(marker);
         });
+        if (this.geoOk) {
+          this.geolocationMarker[0] = this.coordinates.coords.latitude;
+          this.geolocationMarker[1] = this.coordinates.coords.longitude;
+          console.log("geo: " + this.geolocationMarker);
+        }
+
         this.isLoading = false;
       })
       .catch((error) => {
@@ -101,5 +122,11 @@ export default {
       });
     },
   },
+  computed:{
+    
+    dynamicAnchor() {
+      return [this.iconSize / 2, this.iconSize * 1.15];
+    }
+  }
 };
 </script>
