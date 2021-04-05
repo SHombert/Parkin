@@ -26,7 +26,11 @@
         </l-icon>
         <div v-if="!clicked"></div>
       </l-marker>
-      <l-marker v-if="geoOk" :lat-lng="geolocationMarker">
+      <l-marker
+        v-if="geoOk"
+        :lat-lng="geolocationMarker"
+        :options="optionsGeolocation"
+      >
         <l-icon :icon-anchor="dynamicAnchor">
           <img src="../../public/assets/pin.png" width="30" height="30" />
         </l-icon>
@@ -75,7 +79,9 @@ export default {
       clicked: false,
       coordinates: {},
       geoOk: false,
+      permission: {},
       iconSize: 25,
+      optionsGeolocation: { title: "Ma position" },
     };
   },
   async beforeMount() {
@@ -87,8 +93,11 @@ export default {
     this.mapIsReady = true;
   },
   async mounted() {
+    // this.permission = await Permissions.query({ name: PermissionType.Geolocation });
+    // console.log(this.permission);
     this.coordinates = await Geolocation.getCurrentPosition();
     this.geoOk = !(typeof this.coordinates === "undefined");
+
     await this.getParkings();
     if (this.geoOk) {
       this.geolocationMarker[0] = this.coordinates.coords.latitude;
