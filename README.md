@@ -1,4 +1,8 @@
-# parkin
+# Parkin
+
+Projet de développement d'application mobile.
+
+L'application Parkin' permet d'afficher les parkings de Nantes ainsi que la localisation de l'appareil de l'utilisateur.
 
 ## Project setup
 ```
