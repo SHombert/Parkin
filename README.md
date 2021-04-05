@@ -26,6 +26,9 @@ npm run build
 npm run lint
 ```
 
+### Lancement de la version mobile :
+https://developer.android.com/studio/run
+
 ### Mise à jour et génération android
 
 Si le code de la webApp est mis à jour, suivre les étapes suivantes pour obtenir la version android correspondantes : 
