@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div v-if="!isLoading" class="jumbotron">
-      <h1 >{{ parking.fields.nom_complet }}</h1>
+      <h1>{{ parking.fields.nom_complet }}</h1>
       <h5 class="text-muted d-inline">
         {{ parking.fields.capacite_voiture }} places
       </h5>
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import * as storage from "../scripts/storage.js";
 export default {
   name: "ParkingDetail",
   props: {
@@ -70,29 +70,18 @@ export default {
     };
   },
   mounted() {
-    axios
-      .get(
-        "https://data.nantesmetropole.fr/api/records/1.0/search/?dataset=244400404_parkings-publics-nantes&rows=100"
-      )
-      .then((response) => {
-        let parkingFromRequest = response.data.records.filter(
-          (record) => record.recordid == this.id
-        );
-        console.log(parkingFromRequest);
-        if (parkingFromRequest.length > 0) {
-          this.parking = parkingFromRequest[0];
-          this.mapURL =
-            "https://maps.google.com/?q=" +
-            this.parking.fields.location[0] +
-            "," +
-            this.parking.fields.location[1];
-
-          this.isLoading = false;
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    this.getParking(this.id);
+    this.isLoading = false;
+  },
+  methods: {
+    async getParking(id) {
+      this.parking = await storage.getObject(id);
+      this.mapURL =
+        "https://maps.google.com/?q=" +
+        this.parking.fields.location[0] +
+        "," +
+        this.parking.fields.location[1];
+    },
   },
 };
 </script>

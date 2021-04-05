@@ -4,7 +4,7 @@
       <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
       <l-marker
         v-for="marker in markers"
-        :key="marker.location"
+        :key="marker.recordid"
         :lat-lng="marker.location"
         :options="marker.options"
         @click="clickedMarker(marker.location)"
@@ -18,15 +18,17 @@
           </button>
         </l-popup>
         <l-icon :icon-anchor="dynamicAnchor">
-          <img src="../../public/assets/placeholder.png" width="30"
-            height="30">
+          <img
+            src="../../public/assets/placeholder.png"
+            width="30"
+            height="30"
+          />
         </l-icon>
         <div v-if="!clicked"></div>
       </l-marker>
       <l-marker v-if="geoOk" :lat-lng="geolocationMarker">
         <l-icon :icon-anchor="dynamicAnchor">
-          <img src="../../public/assets/pin.png" width="30"
-            height="30">
+          <img src="../../public/assets/pin.png" width="30" height="30" />
         </l-icon>
       </l-marker>
     </l-map>
@@ -37,8 +39,15 @@
 <script>
 import "leaflet/dist/leaflet.css";
 
-import { LMap, LTileLayer, LMarker, LPopup, LIcon } from "@vue-leaflet/vue-leaflet";
+import {
+  LMap,
+  LTileLayer,
+  LMarker,
+  LPopup,
+  LIcon,
+} from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
+import * as storage from "../scripts/storage.js";
 import { Geolocation } from "@capacitor/core";
 
 export default {
@@ -55,7 +64,7 @@ export default {
       isLoading: true,
       parkings: new Array(),
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      zoom: 13,
+      zoom: 14,
       center: [47.1983256, -1.5461534],
       bounds: null,
       attribution:
@@ -66,7 +75,7 @@ export default {
       clicked: false,
       coordinates: {},
       geoOk: false,
-      iconSize:25,
+      iconSize: 25,
     };
   },
   async beforeMount() {
@@ -76,37 +85,61 @@ export default {
     //And now the Leaflet circleMarker function can be used by the options:
 
     this.mapIsReady = true;
-    this.coordinates = await Geolocation.getCurrentPosition();
-    this.geoOk = !(typeof this.coordinates=== "undefined");
   },
-  mounted() {
-    axios
-      .get(
-        "https://data.nantesmetropole.fr/api/records/1.0/search/?dataset=244400404_parkings-publics-nantes&rows=100"
-      )
-      .then((response) => {
-        this.parkings = response.data.records;
-        this.parkings.forEach((value) => {
+  async mounted() {
+    this.coordinates = await Geolocation.getCurrentPosition();
+    this.geoOk = !(typeof this.coordinates === "undefined");
+    await this.getParkings();
+    if (this.geoOk) {
+      this.geolocationMarker[0] = this.coordinates.coords.latitude;
+      this.geolocationMarker[1] = this.coordinates.coords.longitude;
+    }
+    this.isLoading = false;
+  },
+  methods: {
+    getParkingsREST() {
+      axios
+        .get(
+          "https://data.nantesmetropole.fr/api/records/1.0/search/?dataset=244400404_parkings-publics-nantes&rows=100"
+        )
+        .then((response) => {
+          this.parkings = response.data.records;
+          this.parkings.forEach(async (value) => {
+            var marker = {
+              recordid: value.recordid,
+              location: value.fields.location,
+              options: {
+                title: value.fields.nom_complet,
+              },
+            };
+            this.markers.push(marker);
+            await storage.setObject(value.recordid, value);
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    async getParkings() {
+      var dbEmpty = await storage.isEmpty();
+      if (dbEmpty) {
+        await this.getParkingsREST();
+      } else {
+        var keys = await storage.keys();
+        keys.forEach(async (key) => {
+          var parking = await storage.getObject(key);
+          this.parkings.push(parking);
           var marker = {
-            location: value.fields.location,
+            recordid: parking.recordid,
+            location: parking.fields.location,
             options: {
-              title: value.fields.nom_complet,
+              title: parking.fields.nom_complet,
             },
           };
           this.markers.push(marker);
         });
-        if (this.geoOk) {
-          this.geolocationMarker[0] = this.coordinates.coords.latitude;
-          this.geolocationMarker[1] = this.coordinates.coords.longitude;
-        }
-
-        this.isLoading = false;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  },
-  methods: {
+      }
+    },
     clickedMarker(location) {
       this.currentParking = this.parkings.filter(
         (record) => record.fields.location == location
@@ -121,10 +154,10 @@ export default {
       });
     },
   },
-  computed:{  
+  computed: {
     dynamicAnchor() {
       return [this.iconSize / 2, this.iconSize * 1.15];
-    }
-  }
+    },
+  },
 };
 </script>
