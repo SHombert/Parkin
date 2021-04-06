@@ -156,6 +156,7 @@ export default {
       if (this.geoOk) {
         this.geolocationMarker[0] = this.coordinates.coords.latitude;
         this.geolocationMarker[1] = this.coordinates.coords.longitude;
+        this.center=this.geolocationMarker;
       }
     },
     //Permet de suivre la position dynamiquement
@@ -167,6 +168,7 @@ export default {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             };
+
           
         }
       );
