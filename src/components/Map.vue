@@ -52,7 +52,7 @@ import {
 } from "@vue-leaflet/vue-leaflet";
 import axios from "axios";
 import * as storage from "../scripts/storage.js";
-import { Geolocation } from "@capacitor/core";
+import { Geolocation, Permissions, PermissionType } from "@capacitor/core";
 
 export default {
   name: "Map",
@@ -87,23 +87,16 @@ export default {
   async beforeMount() {
     // HERE is where to load Leaflet components!
     //const { circleMarker } = await import("leaflet/dist/leaflet-src.esm");
-
     //And now the Leaflet circleMarker function can be used by the options:
 
     this.mapIsReady = true;
   },
-  async mounted() {
-    // this.permission = await Permissions.query({ name: PermissionType.Geolocation });
-    // console.log(this.permission);
-    this.coordinates = await Geolocation.getCurrentPosition();
-    this.geoOk = !(typeof this.coordinates === "undefined");
-
-    await this.getParkings();
-    if (this.geoOk) {
-      this.geolocationMarker[0] = this.coordinates.coords.latitude;
-      this.geolocationMarker[1] = this.coordinates.coords.longitude;
-    }
+  mounted() {
+    this.getParkings();
+    this.getPosition();
+    console.log(this.geoOk);
     this.isLoading = false;
+    this.watchPosition();
   },
   methods: {
     getParkingsREST() {
@@ -148,6 +141,31 @@ export default {
           this.markers.push(marker);
         });
       }
+    },
+    async getPosition() {
+      this.coordinates = await Geolocation.getCurrentPosition();
+      /*this.permission = await Permissions.query({
+        name: PermissionType.Geolocation,
+      });
+      this.geoOk = this.permission.state === "granted";*/
+      this.geoOk = !(typeof this.coordinates ==="undefined");
+      if (this.geoOk) {
+        this.geolocationMarker[0] = this.coordinates.coords.latitude;
+        this.geolocationMarker[1] = this.coordinates.coords.longitude;
+      }
+    },
+    watchPosition() {
+      const wait = Geolocation.watchPosition(
+        {},
+         (position, failurePosition) => {    
+            this.geolocationMarker = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+          
+        }
+      );
+      console.log(wait);
     },
     clickedMarker(location) {
       this.currentParking = this.parkings.filter(
