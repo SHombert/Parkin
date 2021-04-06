@@ -45,6 +45,7 @@ export default {
         console.log(error);
       });
     },
+    /** Retourne les parkings, soit via une requete REST si le localStorage n'est pas encore à jour, sinon via local storage */
     async getParkings(){
       var dbEmpty = await storage.isEmpty();
       if (dbEmpty){

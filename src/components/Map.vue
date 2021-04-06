@@ -99,6 +99,7 @@ export default {
     this.watchPosition();
   },
   methods: {
+    /** Appel rest pour les parkings + mise à jour des marqueurs */
     getParkingsREST() {
       axios
         .get(
@@ -122,6 +123,8 @@ export default {
           console.log(error);
         });
     },
+
+    /** Retourne les parkings, soit via une requete REST si le localStorage n'est pas encore à jour, sinon via local storage + mise à jour des marqueurs */
     async getParkings() {
       var dbEmpty = await storage.isEmpty();
       if (dbEmpty) {
@@ -142,6 +145,7 @@ export default {
         });
       }
     },
+    // premiere position au lancement de l'application
     async getPosition() {
       this.coordinates = await Geolocation.getCurrentPosition();
       /*this.permission = await Permissions.query({
@@ -154,6 +158,7 @@ export default {
         this.geolocationMarker[1] = this.coordinates.coords.longitude;
       }
     },
+    //Permet de suivre la position dynamiquement
     watchPosition() {
       const wait = Geolocation.watchPosition(
         {},
